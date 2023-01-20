@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "kafka-connect-watcher"
+version = "0.1.0"
+description = ""
+authors = ["John \"Preston\" Mille <john@ews-network.net>"]
+readme = "README.rst"
+packages = [{ include = "kafka_connect_watcher" }]
+include = [
+  "kafka_connect_watcher/**/*.json",
+]
+exclude = ["*.pyc", "*~", "*pycache*"]
+
+
+[tool.poetry.dependencies]
+python = "^3.9"
+compose-x-common = "^1.2.6"
+kafka-connect-api = "^0.5.0"
+pyyaml = "^6.0"
+jsonschema = "^4.17.3"
+importlib-resources = "^5.10.2"
+prometheus-client = "^0.15.0"
+aws-embedded-metrics = "^3.0.0"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^22.12.0"
+isort = "^5.11.4"
+pre-commit = "^2.21.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

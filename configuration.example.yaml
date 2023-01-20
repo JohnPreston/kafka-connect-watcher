@@ -1,0 +1,56 @@
+---
+# Configuration example
+
+clusters:
+  - hostname: localhost
+    port: 8083
+    interval: 5s
+    metrics:
+      prometheus:
+        enabled: true
+      aws_emf:
+        enabled: true
+    error_handling_rules:
+      - include_regex:
+          - 'sainsburys.applications.sc-dis(.*)$'
+        exclude_regex: []
+        ignore_paused: true
+        auto_correct:
+          - action: restart
+            wait_for_status: 10s
+            on_failure:
+              log_level: DEBUG
+          - action: restart
+          - action: pause
+            notify:
+              - target: sns.main_topic
+              - target: sns.alternate_topic
+              - target: http.slack_hook
+
+
+notification_channels:
+  sns:
+    main_topic:
+      topic_arn:
+      format: json
+
+    alternate_topic:
+      topic_arn:
+      format: email
+      template: /path/to/template.j2
+
+    remote_team_topic:
+      topic_arn: cds-account
+      role_arn: cds-role
+
+
+  http:
+    slack_hook:
+      hostname:
+      port:
+      authentication:
+        username:
+        password:
+
+prometheus:
+  port: 8000

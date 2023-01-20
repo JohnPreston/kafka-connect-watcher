@@ -1,0 +1,195 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "id": "watcher-config.spec.json",
+  "$id": "watcher-config.spec.json",
+  "title": "Kafka Connect Watcher configuration input",
+  "description": "Schema of the configuration for Kafka Connect Watcher",
+  "type": "object",
+  "properties": {
+    "clusters": {
+      "description": "List of Connect clusters to monitor.",
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/definitions/ConnectCluster"
+      }
+    }
+  },
+  "definitions": {
+    "ConnectCluster": {
+      "type": "object",
+      "required": ["hostname"],
+      "properties": {
+        "hostname": {
+          "description": "Connect cluster endpoint/IP Address",
+          "type": "string"
+        },
+        "port": {
+          "description": "Connect cluster API Port",
+          "type": "integer",
+          "default": 8083
+        },
+        "url": {
+          "type": "string",
+          "description": "The URL to the connect cluster, instead of hostname/port combination."
+        },
+        "authentication": {
+          "description": "Basic Authentication",
+          "$ref": "#/definitions/BasicAuth"
+        },
+        "ignore_https_error": {
+          "type": "boolean",
+          "description": "Ignore SSL related errors (CA, self-signed)"
+        },
+        "intervals": {
+          "type": "string",
+          "description": "Duration (converted to seconds) between connectors scans. Minimum 2 seconds"
+        },
+        "metrics": {
+          "description": "Configure metrics export for the connect cluster",
+          "$ref": "#/definitions/ClusterMetrics"
+        },
+        "error_handling_rules": {
+          "type": "array",
+          "uniqueItems": true,
+          "description": "List of rules (in-order) to execute if matching connectors state is not RUNNING",
+          "items": {
+            "$ref": "#/definitions/ErrorHandlingRule"
+          }
+        }
+      }
+    },
+    "ErrorHandlingRule": {
+      "type": "object",
+      "properties": {
+        "include_regex": {
+          "description": "List of regular expressions or single regular expression to match and include for the error rule handling",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "exclude_regex": {
+          "description": "List of regular expressions or single regular expression to exclude connectors for the error rule handling",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "array"
+              }
+            }
+          ]
+        },
+        "resume_paused": {
+          "type": "boolean",
+          "description": "If the connector is in PAUSED state, attempts to start.",
+          "default": false
+        },
+        "auto_correct_actions": {
+          "description": "List (in-order) of actions to take in attempt to restore the connector.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AutoCorrectAction"
+          }
+        }
+      }
+    },
+    "AutoCorrectAction": {
+      "type": "object",
+      "required": ["action"],
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "restart",
+            "pause",
+            "cycle"
+          ]
+        },
+        "wait_for_status": {
+          "type": "string",
+          "description": "duration to wait before checking on the connector status post action"
+        },
+        "notify": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AutoCorrectActionNotify"
+          }
+        },
+        "on_action_failure": {
+          "$ref": "#/definitions/OnActionFailure"
+        }
+      }
+    },
+    "AutoCorrectActionNotify": {
+      "type": "object",
+      "properties": {
+        "target": {
+          "type": "string"
+        }
+      }
+    },
+    "OnActionFailure": {
+      "type": "object",
+      "properties": {
+        "log_level": {
+          "type": "string",
+          "enum": [
+            "INFO",
+            "ERROR",
+            "DEBUG",
+            "TRACE",
+            "WARN"
+          ]
+        }
+      }
+    },
+    "ClusterMetrics": {
+      "type": "object",
+      "properties": {
+        "prometheus": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            }
+          }
+        },
+        "aws_emf": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    },
+    "BasicAuth": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["username", "password"],
+      "properties": {
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "patternProperties": {
+    "^x-": {}
+  }
+}
