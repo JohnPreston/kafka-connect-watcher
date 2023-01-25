@@ -6,15 +6,22 @@ Models Connect cluster
 """
 
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from kafka_connect_watcher.config import Config
-from compose_x_common.compose_x_common import keyisset, set_else_none
+
 from copy import deepcopy
+
+from aws_embedded_metrics.config import get_config
+from compose_x_common.compose_x_common import keyisset, set_else_none
 from kafka_connect_api.kafka_connect_api import Api, Cluster, Connector
 from prometheus_client import Gauge
-from error_rules import ErrorHandlingRule
+
+from kafka_connect_watcher.error_rules import EvaluationRule
+
+emf_config = get_config()
 
 
 class ConnectCluster:
@@ -29,6 +36,8 @@ class ConnectCluster:
         self.definition: dict = cluster_config
         self._orignial_definiton: dict = deepcopy(cluster_config)
 
+        self._name = set_else_none("name", cluster_config)
+        self._port = int(set_else_none("port", cluster_config, 8083))
         auth = set_else_none("authentication", cluster_config)
         url = set_else_none("url", cluster_config)
         username = set_else_none(
@@ -56,14 +65,21 @@ class ConnectCluster:
         except Exception as error:
             print(error)
 
-        self.handling_rules: list[ErrorHandlingRule] = [
-            ErrorHandlingRule(config)
-            for config in set_else_none("error_handling_rules", self.definition)
+        self.handling_rules: list[EvaluationRule] = [
+            EvaluationRule(config)
+            for config in set_else_none(EvaluationRule.config_key, self.definition)
         ]
+        self.metrics_config: dict = set_else_none("metrics", self.definition, {})
+        self.emf_config: dict = set_else_none("aws_emf", self.metrics_config, {})
+        self.prometheus_config: dict = set_else_none(
+            "prometheus", self.metrics_config, {}
+        )
+        self.emf_namespace = None
+        self.metrics: dict = {"connectors": {}}
 
     @property
     def hostname(self) -> str:
-        return self._definition["hostname"]
+        return self.definition["hostname"]
 
     @property
     def api(self) -> Api:
@@ -72,3 +88,16 @@ class ConnectCluster:
     @property
     def cluster(self) -> Cluster:
         return self._cluster
+
+    @property
+    def name(self) -> str:
+        if self._name:
+            return self._name
+        return f"{self.hostname}_{self.port}"
+
+    @property
+    def port(self) -> int:
+        return self._port
+
+    def emf_enabled(self) -> bool:
+        return keyisset("enabled", self.emf_config)

@@ -1,0 +1,45 @@
+---
+# Docker compose example file to test EMF & Prometheus
+
+version: "3.8"
+services:
+#  kafka-connect-watcher:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    image: kafka-connect-watcher
+#    volumes:
+#      - ./configuration.example.yaml:/etc/config/configuration.example.yaml
+#    command:
+#      - -c
+#      - /etc/config/configuration.example.yaml
+
+  cw-agent:
+    image: public.ecr.aws/cloudwatch-agent/cloudwatch-agent:latest
+    ports:
+      - 25888:25888/tcp
+      - 25888:25888/udp
+    depends_on:
+      - ecs-local-endpoints
+    environment:
+      AWS_CONTAINER_CREDENTIALS_RELATIVE_URI: "/creds"
+      ECS_CONTAINER_METADATA_URI: "http://169.254.170.2/v3/containers/cw-agent"
+      CW_CONFIG_CONTENT: '{"logs":{"metrics_collected":{"emf":{}}}}'
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-eu-west-1}
+      AWS_REGION: ${AWS_DEFAULT_REGION:-eu-west-1}
+    links:
+      - ecs-local-endpoints
+
+  ecs-local-endpoints:
+    image: amazon/amazon-ecs-local-container-endpoints
+    volumes:
+      - /var/run:/var/run
+      - $HOME/.aws/:/home/.aws/
+    environment:
+      ECS_LOCAL_METADATA_PORT: "51679"
+      HOME: "/home"
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-eu-west-1}
+      AWS_REGION: ${AWS_DEFAULT_REGION:-eu-west-1}
+      AWS_PROFILE: ${AWS_PROFILE:-default}
+    ports:
+      - 51679:51679

@@ -2,6 +2,7 @@
 #   Copyright 2023 John "Preston" Mille <john@ews-network.net>
 
 from __future__ import annotations
+
 import re
 
 

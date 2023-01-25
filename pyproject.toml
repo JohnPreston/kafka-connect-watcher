@@ -10,6 +10,9 @@ include = [
 ]
 exclude = ["*.pyc", "*~", "*pycache*"]
 
+[tool.poetry.scripts]
+kafka_connect_watcher = "kafka_connect_watcher.cli:start_watcher"
+kafka-connect-watcher = "kafka_connect_watcher.cli:start_watcher"
 
 [tool.poetry.dependencies]
 python = "^3.8"
@@ -30,3 +33,24 @@ pre-commit = "^2.21.0"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+known_first_party = "kelvin"
+
+[tool.coverage.report]
+exclude_lines = [
+  "if __name__ == '__main__'"
+]
+
+[tool.coverage.run]
+omit = [
+  "*/cli.py"
+]

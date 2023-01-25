@@ -18,7 +18,9 @@
   "definitions": {
     "ConnectCluster": {
       "type": "object",
-      "required": ["hostname"],
+      "required": [
+        "hostname"
+      ],
       "properties": {
         "hostname": {
           "description": "Connect cluster endpoint/IP Address",
@@ -61,6 +63,7 @@
     },
     "ErrorHandlingRule": {
       "type": "object",
+      "additionalProperties": false,
       "properties": {
         "include_regex": {
           "description": "List of regular expressions or single regular expression to match and include for the error rule handling",
@@ -85,14 +88,14 @@
             {
               "type": "array",
               "items": {
-                "type": "array"
+                "type": "string"
               }
             }
           ]
         },
-        "resume_paused": {
+        "ignore_paused": {
           "type": "boolean",
-          "description": "If the connector is in PAUSED state, attempts to start.",
+          "description": "If the connector is in PAUSED state, ignores it.",
           "default": false
         },
         "auto_correct_actions": {
@@ -106,7 +109,9 @@
     },
     "AutoCorrectAction": {
       "type": "object",
-      "required": ["action"],
+      "required": [
+        "action"
+      ],
       "properties": {
         "action": {
           "type": "string",
@@ -167,7 +172,26 @@
         },
         "aws_emf": {
           "type": "object",
+          "required": [
+            "namespace"
+          ],
           "properties": {
+            "namespace": {
+              "type": "string"
+            },
+            "dimensions": {
+              "type": "object",
+              "uniqueItems": true,
+              "minProperties": 1,
+              "maxProperties": 29,
+              "description": "Dimension name and value to set in a key/value format.",
+              "patternProperties": {
+                "^\\w+$": {
+                  "type": "string",
+                  "description": "Value for the given dimension"
+                }
+              }
+            },
             "enabled": {
               "type": "boolean"
             }
@@ -178,7 +202,10 @@
     "BasicAuth": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["username", "password"],
+      "required": [
+        "username",
+        "password"
+      ],
       "properties": {
         "username": {
           "type": "string"

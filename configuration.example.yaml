@@ -9,24 +9,57 @@ clusters:
       prometheus:
         enabled: true
       aws_emf:
+        namespace: KafkaConnect/Watcher
+        dimensions:
+          name: dev
         enabled: true
-    error_handling_rules:
+    evaluation_rules:
       - include_regex:
-          - 'sainsburys.applications.sc-dis(.*)$'
-        exclude_regex: []
+          - '(.*)$'
+        exclude_regex:
+          - '(.*)replicator(.*)'
         ignore_paused: true
-        auto_correct:
-          - action: restart
-            wait_for_status: 10s
-            on_failure:
-              log_level: DEBUG
-          - action: restart
-          - action: pause
-            notify:
-              - target: sns.main_topic
-              - target: sns.alternate_topic
-              - target: http.slack_hook
+        auto_correct_actions: []
+#          - action: restart
+#            wait_for_status: 10s
+#            on_failure:
+#              log_level: DEBUG
+#          - action: restart
+#          - action: pause
+#            notify:
+#              - target: sns.main_topic
+#              - target: sns.alternate_topic
+#              - target: http.slack_hook
 
+
+  - hostname: localhost
+    port: 8084
+    interval: 5s
+    metrics:
+      prometheus:
+        enabled: true
+      aws_emf:
+        namespace: KafkaConnect/Watcher
+        dimensions:
+          name: staging
+        enabled: false
+    evaluation_rules:
+      - include_regex:
+          - '(.*)$'
+        exclude_regex:
+          - '(.*)replicator(.*)'
+        ignore_paused: true
+        auto_correct_actions: []
+#          - action: restart
+#            wait_for_status: 10s
+#            on_failure:
+#              log_level: DEBUG
+#          - action: restart
+#          - action: pause
+#            notify:
+#              - target: sns.main_topic
+#              - target: sns.alternate_topic
+#              - target: http.slack_hook
 
 notification_channels:
   sns:
@@ -54,3 +87,8 @@ notification_channels:
 
 prometheus:
   port: 8000
+
+aws_emf:
+  log_group_name: kafka/connect/watcher/metrics
+  service_name: kafka-connect-watcher
+  service_type: python
