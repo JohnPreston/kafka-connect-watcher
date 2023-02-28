@@ -16,19 +16,19 @@ kafka-connect-watcher = "kafka_connect_watcher.cli:start_watcher"
 
 [tool.poetry.dependencies]
 python = "^3.8"
-compose-x-common = "^1.2.6"
-kafka-connect-api = "^0.5.0"
+compose-x-common = "^1.2"
+kafka-connect-api = "^0.5.1"
 pyyaml = "^6.0"
 jsonschema = "^4.17.3"
-importlib-resources = "^5.10.2"
-prometheus-client = "^0.15.0"
+importlib-resources = "^5.10"
+prometheus-client = "^0.16"
 aws-embedded-metrics = "^3.0.0"
 
 
 [tool.poetry.group.dev.dependencies]
-black = "^22.12.0"
-isort = "^5.11.4"
-pre-commit = "^2.21.0"
+black = "^23.1"
+isort = "^5.12"
+pre-commit = "^3.1"
 
 [build-system]
 requires = ["poetry-core"]
