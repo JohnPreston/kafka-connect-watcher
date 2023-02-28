@@ -15,6 +15,7 @@ from os import path
 from typing import Union
 
 import yaml
+from aws_embedded_metrics.storage_resolution import StorageResolution
 from compose_x_common.compose_x_common import get_duration, keyisset, set_else_none
 from importlib_resources import files as pkg_files
 from jsonschema import RefResolver, validate
@@ -60,6 +61,12 @@ class Config:
             "service_name", self.emf_config, "kafka-connect-watcher"
         )
         self.emf_service_type = set_else_none("service_type", self.emf_config, "python")
+        self.emf_watcher_config = (
+            EmfConfig(self.emf_config["watcher_config"])
+            if keyisset("watcher_config", self.emf_config)
+            else None
+        )
+        self.scan_intervals = self.set_scan_intervals()
 
     def __repr__(self):
         return json.dumps(self.original_config)
@@ -89,3 +96,24 @@ class Config:
     @property
     def original_config(self) -> dict:
         return self._original_config
+
+    def set_scan_intervals(self) -> int:
+        intervals_value = set_else_none("watch_interval", self.config, 15)
+        if isinstance(intervals_value, str):
+            interval_delta = get_duration(intervals_value)
+            now = dt.now()
+            return max(2, int(((now + interval_delta) - now).total_seconds()))
+        else:
+            return max([2, intervals_value])
+
+
+class EmfConfig:
+    def __init__(self, config: dict):
+        self.enabled: bool = keyisset("enabled", config)
+        self.namespace = config["namespace"]
+        self.emf_resolution = (
+            StorageResolution.HIGH
+            if keyisset("high_resolution_metrics", config)
+            else StorageResolution.STANDARD
+        )
+        self.dimensions = set_else_none("dimensions", config, {})

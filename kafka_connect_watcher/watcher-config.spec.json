@@ -13,6 +13,27 @@
       "items": {
         "$ref": "#/definitions/ConnectCluster"
       }
+    },
+    "aws_emf": {
+      "type": "object",
+      "properties": {
+        "log_group_name": {
+          "type": "string",
+          "description": "override log group name to publish metrics to. Importance: High",
+          "default": "kafka/connect/watcher/metrics"
+        },
+        "service_name": {
+          "type": "string",
+          "description": "override value for EMF Service name. Importance: Low"
+        },
+        "watcher_config": {
+          "$ref": "#/definitions/aws_emf"
+        }
+      }
+    },
+    "watch_interval": {
+      "type": "string",
+      "description": "intervals converted to seconds between scans of all clusters."
     }
   },
   "definitions": {
@@ -42,10 +63,6 @@
         "ignore_https_error": {
           "type": "boolean",
           "description": "Ignore SSL related errors (CA, self-signed)"
-        },
-        "intervals": {
-          "type": "string",
-          "description": "Duration (converted to seconds) between connectors scans. Minimum 2 seconds"
         },
         "metrics": {
           "description": "Configure metrics export for the connect cluster",
@@ -171,31 +188,39 @@
           }
         },
         "aws_emf": {
+          "$ref": "#/definitions/aws_emf"
+        }
+      }
+    },
+    "aws_emf": {
+      "type": "object",
+      "required": [
+        "namespace"
+      ],
+      "properties": {
+        "namespace": {
+          "type": "string"
+        },
+        "high_resolution_metrics": {
+          "type": "boolean",
+          "default": false,
+          "description": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/publishingMetrics.html#high-resolution-metrics"
+        },
+        "dimensions": {
           "type": "object",
-          "required": [
-            "namespace"
-          ],
-          "properties": {
-            "namespace": {
-              "type": "string"
-            },
-            "dimensions": {
-              "type": "object",
-              "uniqueItems": true,
-              "minProperties": 1,
-              "maxProperties": 29,
-              "description": "Dimension name and value to set in a key/value format.",
-              "patternProperties": {
-                "^\\w+$": {
-                  "type": "string",
-                  "description": "Value for the given dimension"
-                }
-              }
-            },
-            "enabled": {
-              "type": "boolean"
+          "uniqueItems": true,
+          "minProperties": 1,
+          "maxProperties": 25,
+          "description": "Dimension name and value to set in a key/value format.",
+          "patternProperties": {
+            "^\\w+$": {
+              "type": "string",
+              "description": "Value for the given dimension"
             }
           }
+        },
+        "enabled": {
+          "type": "boolean"
         }
       }
     },
