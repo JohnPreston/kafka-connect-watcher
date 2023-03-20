@@ -7,6 +7,7 @@ readme = "README.rst"
 packages = [{ include = "kafka_connect_watcher" }]
 include = [
   "kafka_connect_watcher/**/*.json",
+  "kafka_connect_watcher/**/*.j2"
 ]
 exclude = ["*.pyc", "*~", "*pycache*"]
 
@@ -17,12 +18,13 @@ kafka-connect-watcher = "kafka_connect_watcher.cli:start_watcher"
 [tool.poetry.dependencies]
 python = "^3.8"
 compose-x-common = "^1.2"
-kafka-connect-api = "^0.5.1"
+kafka-connect-api = "^0.5.3"
 pyyaml = "^6.0"
 jsonschema = "^4.17.3"
 importlib-resources = "^5.10"
 prometheus-client = "^0.16"
 aws-embedded-metrics = "^3.0.0"
+jinja2 = "^3.1.2"
 
 
 [tool.poetry.group.dev.dependencies]

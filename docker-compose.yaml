@@ -3,16 +3,16 @@
 
 version: "3.8"
 services:
-#  kafka-connect-watcher:
-#    build:
-#      context: .
-#      dockerfile: Dockerfile
-#    image: kafka-connect-watcher
-#    volumes:
-#      - ./configuration.example.yaml:/etc/config/configuration.example.yaml
-#    command:
-#      - -c
-#      - /etc/config/configuration.example.yaml
+  kafka-connect-watcher:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: kafka-connect-watcher
+    volumes:
+      - ./configuration.example.yaml:/etc/config/configuration.example.yaml
+    command:
+      - -c
+      - /etc/config/configuration.example.yaml
 
   cw-agent:
     image: public.ecr.aws/cloudwatch-agent/cloudwatch-agent:latest

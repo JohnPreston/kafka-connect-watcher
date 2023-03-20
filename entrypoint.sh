@@ -4,5 +4,5 @@
 #   Copyright 2023 John "Preston" Mille <john@ews-network.net>
 #
 
-echo $PATH
+#echo $PATH
 exec kafka-connect-watcher "$@"

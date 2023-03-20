@@ -10,6 +10,9 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from kafka_connect_watcher.config import Config
+
 from aws_embedded_metrics.config import get_config
 from compose_x_common.compose_x_common import keyisset, set_else_none
 from kafka_connect_api.kafka_connect_api import Api, Cluster, Connector
@@ -27,7 +30,7 @@ class ConnectCluster:
     It also collects metrics about itself.
     """
 
-    def __init__(self, cluster_config: dict):
+    def __init__(self, cluster_config: dict, watcher_config: Config):
         if not isinstance(cluster_config, dict):
             raise TypeError("cluster_config must be a dict. Got", type(cluster_config))
         self.definition: dict = cluster_config
@@ -63,7 +66,7 @@ class ConnectCluster:
             print(error)
 
         self.handling_rules: list[EvaluationRule] = [
-            EvaluationRule(config)
+            EvaluationRule(config, watcher_config)
             for config in set_else_none(EvaluationRule.config_key, self.definition)
         ]
         self.metrics_config: dict = set_else_none("metrics", self.definition, {})

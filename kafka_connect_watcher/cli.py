@@ -17,7 +17,7 @@ def start_watcher():
     args = parser.parse_args()
 
     config = Config(path.abspath(args.config_file))
-    watcher = Watcher(config)
+    watcher = Watcher()
     watcher.run(config)
 
 

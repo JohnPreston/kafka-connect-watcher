@@ -5,6 +5,7 @@
   "title": "Kafka Connect Watcher configuration input",
   "description": "Schema of the configuration for Kafka Connect Watcher",
   "type": "object",
+  "additionalProperties": false,
   "properties": {
     "clusters": {
       "description": "List of Connect clusters to monitor.",
@@ -13,6 +14,10 @@
       "items": {
         "$ref": "#/definitions/ConnectCluster"
       }
+    },
+    "prometheus": {},
+    "notification_channels": {
+      "$ref": "#/definitions/NotificationChannels"
     },
     "aws_emf": {
       "type": "object",
@@ -135,7 +140,8 @@
           "enum": [
             "restart",
             "pause",
-            "cycle"
+            "cycle",
+            "notify_only"
           ]
         },
         "wait_for_status": {
@@ -237,6 +243,51 @@
         },
         "password": {
           "type": "string"
+        }
+      }
+    },
+    "NotificationChannels": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "sns": {
+          "type": "object",
+          "uniqueItems": true,
+          "patternProperties": {
+            "^[a-zA-Z0-9-_]+$": {
+              "$ref": "#/definitions/SnsTopicChannel"
+            }
+          }
+        }
+      }
+    },
+    "SnsTopicChannel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["topic_arn"],
+      "properties": {
+        "topic_arn": {
+          "type": "string",
+          "description": "ARN of the SNS topic."
+        },
+        "role_arn": {
+          "type": "string",
+          "description": "Optional - Use IAM role to publish messages using another IAM role"
+        },
+        "template": {
+          "type": "object",
+          "description": "Allows to set specific templates for email and sms ",
+          "additionalProperties": false,
+          "properties": {
+            "email": {
+              "type": "string",
+              "description": "Optional - Path to a template for SNS Email messages"
+            },
+            "sms": {
+              "type": "string",
+              "description": "Optional - Path to a template for SNS SMS messages"
+            }
+          }
         }
       }
     }

@@ -21,7 +21,7 @@ from time import sleep
 from kafka_connect_watcher.aws_emf import (
     init_emf_config,
     publish_clusters_emf,
-    publish_watcher_emf,
+    handle_watcher_emf,
 )
 from kafka_connect_watcher.cluster import ConnectCluster
 from kafka_connect_watcher.logger import LOG
@@ -36,7 +36,7 @@ class Watcher:
     handling exceptions and graceful shutdowns.
     """
 
-    def __init__(self, config: Config):
+    def __init__(self):
         signal.signal(signal.SIGINT, self.exit_gracefully)
         signal.signal(signal.SIGTERM, self.exit_gracefully)
         self.keep_running: bool = True
@@ -50,9 +50,9 @@ class Watcher:
 
     def run(self, config: Config):
         clusters: list[ConnectCluster] = [
-            ConnectCluster(cluster) for cluster in config.config["clusters"]
+            ConnectCluster(cluster, config) for cluster in config.config["clusters"]
         ]
-        self.metrics.update({"clusters_total": len(clusters)})
+        self.metrics.update({"connect_clusters_total": len(clusters)})
         init_emf_config(config)
         for _ in range(NUM_THREADS):
             _thread = threading.Thread(
@@ -74,10 +74,13 @@ class Watcher:
                         False,
                     )
                 self.connect_clusters_processing_queue.join()
+                if config.emf_watcher_config:
+                    handle_watcher_emf(config, self)
                 sleep(config.scan_intervals)
-                print(self.metrics)
-                if config.emf_watcher_config.enabled:
-                    publish_watcher_emf(config, self)
+                self.metrics.update(
+                    {"connect_clusters_healthy": 0, "connect_clusters_unhealthy": 0}
+                )
+                LOG.info("Hearbeat")
         except KeyboardInterrupt:
             self.keep_running = False
             LOG.debug("\rExited due to Keyboard interrupt")
@@ -88,33 +91,30 @@ class Watcher:
         exit(0)
 
 
+def process_error_rules(
+    handling_rule, connect_cluster: ConnectCluster, watcher: Watcher
+):
+    try:
+        handling_rule.execute(connect_cluster)
+        watcher.metrics["connect_clusters_healthy"] += 1
+    except Exception as error:
+        watcher.metrics["connect_clusters_unhealthy"] += 1
+        LOG.exception(error)
+        LOG.error(f"Failed to process the cluster {connect_cluster.name}")
+    try:
+        if connect_cluster.emf_config:
+            publish_clusters_emf(connect_cluster)
+    except Exception as error:
+        LOG.exception(error)
+        LOG.error(f"Failed to export EMF metrics for cluster {connect_cluster.name}")
+
+
 def process_cluster(queue: Queue):
     while FOREVER:
-        healthy = 0
-        unhealthy = 0
         if not queue.empty():
             watcher, config, connect_cluster = queue.get()
             if connect_cluster is None:
                 break
             for handling_rule in connect_cluster.handling_rules:
-                try:
-                    handling_rule.execute(connect_cluster)
-                    healthy += 1
-                    if connect_cluster.emf_config.enabled:
-                        try:
-                            loop = get_event_loop()
-                        except RuntimeError:
-                            loop = new_event_loop()
-                        set_event_loop(loop)
-                        publish_clusters_emf(connect_cluster)
-                except Exception as error:
-                    unhealthy += 1
-                    print(error)
-                    print(f"Failed to process the cluster {connect_cluster.name}")
+                process_error_rules(handling_rule, connect_cluster, watcher)
             queue.task_done()
-            watcher.metrics.update(
-                {
-                    "connect_clusters_unhealthy": unhealthy,
-                    "connect_clusters_healthy": healthy,
-                }
-            )

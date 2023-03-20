@@ -28,7 +28,6 @@ def evaluate_connector_status(queue: Queue) -> None:
         if connect is None:
             break
 
-        # print("CONNECT?", connect, "CONNECTOR?", connector.name)
         connector_metrics: dict = {
             "tasks": len(connector.tasks),
             "running": len(

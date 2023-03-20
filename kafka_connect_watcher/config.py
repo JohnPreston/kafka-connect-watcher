@@ -25,6 +25,9 @@ try:
 except ImportError:
     from yaml import CLoader as Loader
 
+from kafka_connect_watcher.aws_sns import SnsChannel
+from kafka_connect_watcher.logger import LOG
+
 
 class Config:
     """
@@ -67,6 +70,21 @@ class Config:
             else None
         )
         self.scan_intervals = self.set_scan_intervals()
+        self.notification_channels: dict = {}
+        if keyisset("notification_channels", self.config):
+            for channel_name, channel_definition in self.config[
+                "notification_channels"
+            ].items():
+                if channel_name == "sns":
+                    for (
+                        sns_channel_name,
+                        sns_channel_definition,
+                    ) in channel_definition.items():
+                        self.notification_channels[
+                            f"{channel_name}.{sns_channel_name}"
+                        ] = SnsChannel(sns_channel_name, sns_channel_definition)
+                else:
+                    LOG.warning("Channel {} is not supported.".format(channel_name))
 
     def __repr__(self):
         return json.dumps(self.original_config)
