@@ -14,9 +14,9 @@ if TYPE_CHECKING:
 
 import signal
 import threading
-from asyncio import get_event_loop, new_event_loop, set_event_loop
 from queue import Queue
 from time import sleep
+from datetime import datetime as dt
 
 from kafka_connect_watcher.aws_emf import (
     init_emf_config,
@@ -49,11 +49,13 @@ class Watcher:
         }
 
     def run(self, config: Config):
+        LOG.info("Initializing the watcher")
         clusters: list[ConnectCluster] = [
             ConnectCluster(cluster, config) for cluster in config.config["clusters"]
         ]
         self.metrics.update({"connect_clusters_total": len(clusters)})
         init_emf_config(config)
+        LOG.info("Watcher clusters initialized.")
         for _ in range(NUM_THREADS):
             _thread = threading.Thread(
                 target=process_cluster,
@@ -62,8 +64,15 @@ class Watcher:
             )
             _thread.start()
             self._threads.append(_thread)
+        LOG.info(
+            "Watcher threads ({}) initialized. Processing clusters & evaluation rules.".format(
+                NUM_THREADS
+            )
+        )
         try:
             while self.keep_running:
+                now = dt.now()
+                LOG.info("Clusters processing started")
                 for connect_cluster in clusters:
                     self.connect_clusters_processing_queue.put(
                         [
@@ -74,13 +83,18 @@ class Watcher:
                         False,
                     )
                 self.connect_clusters_processing_queue.join()
+                LOG.info(
+                    "Clusters processing finished - {}s".format(
+                        (dt.now() - now).total_seconds()
+                    )
+                )
                 if config.emf_watcher_config:
                     handle_watcher_emf(config, self)
                 sleep(config.scan_intervals)
                 self.metrics.update(
                     {"connect_clusters_healthy": 0, "connect_clusters_unhealthy": 0}
                 )
-                LOG.info("Hearbeat")
+                LOG.debug("Watcher metrics: {}".format(self.metrics))
         except KeyboardInterrupt:
             self.keep_running = False
             LOG.debug("\rExited due to Keyboard interrupt")

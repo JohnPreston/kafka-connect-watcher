@@ -166,7 +166,9 @@ class AutoCorrectRule:
         for _notify_target in self.notify_targets:
             _target_path = _notify_target["target"]
             if _target_path in watcher_config.notification_channels:
-                self.notification_channels.append(watcher_config.notification_channels[_target_path])
+                self.notification_channels.append(
+                    watcher_config.notification_channels[_target_path]
+                )
             else:
                 print(f"{_target_path} not defined in notification_channels")
 
