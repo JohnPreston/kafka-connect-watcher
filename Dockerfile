@@ -6,6 +6,7 @@ ARG LAMBDA_IMAGE=public.ecr.aws/lambda/python:latest
 FROM $BASE_IMAGE as builder
 
 WORKDIR /opt
+RUN apk add build-base; apk add libffi-dev
 RUN python -m pip install pip -U; python -m pip install poetry
 COPY kafka_connect_watcher /opt/kafka_connect_watcher
 COPY poetry.lock pyproject.toml README.rst /opt/
