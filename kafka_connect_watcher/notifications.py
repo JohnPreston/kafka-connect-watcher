@@ -4,13 +4,16 @@
 """Manages different channels of communications"""
 
 from __future__ import annotations
-from typing import Union, TYPE_CHECKING
+
+from typing import TYPE_CHECKING, Union
+
 from compose_x_common.compose_x_common import keyisset
 
 if TYPE_CHECKING:
     from kafka_connect_watcher.config import Config
 
 from copy import deepcopy
+
 from kafka_connect_watcher.aws_sns import SnsChannel
 
 

@@ -13,19 +13,18 @@ if TYPE_CHECKING:
     from kafka_connect_api.kafka_connect_api import Connector
     from kafka_connect_watcher.cluster import ConnectCluster
 
-from os import path, environ
-from jinja2 import (
-    Environment,
-    BaseLoader,
-)
-from kafka_connect_api.errors import GenericNotFound
-from importlib_resources import files as pkg_files
-from botocore.exceptions import ClientError
-from datetime import datetime as dt
-from compose_x_common.compose_x_common import keyisset, set_else_none
-from compose_x_common.aws import get_assume_role_session
 from copy import deepcopy
+from datetime import datetime as dt
+from os import environ, path
+
 from boto3.session import Session
+from botocore.exceptions import ClientError
+from compose_x_common.aws import get_assume_role_session
+from compose_x_common.compose_x_common import keyisset, set_else_none
+from importlib_resources import files as pkg_files
+from jinja2 import BaseLoader, Environment
+from kafka_connect_api.errors import GenericNotFound
+
 from kafka_connect_watcher.logger import LOG
 
 

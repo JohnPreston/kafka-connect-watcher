@@ -1,9 +1,23 @@
 [tool.poetry]
 name = "kafka-connect-watcher"
 version = "0.2.0"
-description = ""
+description = "Kafka Connect active watcher"
 authors = ["John \"Preston\" Mille <john@ews-network.net>"]
 readme = "README.rst"
+license = "MPL-2.0"
+keywords = ["kafka", "connect", "monitoring", "observability"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Intended Audience :: System Administrators",
+  "Intended Audience :: Information Technology",
+  "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)",
+  "Natural Language :: English",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+]
 packages = [{ include = "kafka_connect_watcher" }]
 include = [
   "kafka_connect_watcher/**/*.json",
@@ -34,6 +48,13 @@ jinja2 = "^3.1.2"
 black = "^23.1"
 isort = "^5.12"
 pre-commit = "^3.1"
+
+
+[tool.poetry.group.docs.dependencies]
+sphinx = "^6.1.3"
+sphinx-material = "^0.0.35"
+sphinx-autodoc-typehints = "^1.22"
+sphinx-jsonschema = "^1.19.1"
 
 [build-system]
 requires = ["poetry-core"]

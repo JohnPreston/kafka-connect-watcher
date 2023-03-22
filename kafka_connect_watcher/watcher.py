@@ -14,14 +14,14 @@ if TYPE_CHECKING:
 
 import signal
 import threading
+from datetime import datetime as dt
 from queue import Queue
 from time import sleep
-from datetime import datetime as dt
 
 from kafka_connect_watcher.aws_emf import (
+    handle_watcher_emf,
     init_emf_config,
     publish_clusters_emf,
-    handle_watcher_emf,
 )
 from kafka_connect_watcher.cluster import ConnectCluster
 from kafka_connect_watcher.logger import LOG

@@ -86,7 +86,7 @@ docs: clean-c9 ## generate Sphinx HTML documentation, including API docs
 	rm -f docs/kafka_connect_watcher.rst
 	rm -f docs/modules.rst
 	find docs -name "kafka_connect_watcher.*.rst" -print -delete
-	sphinx-apidoc -o docs/ kafka_connect_watcher
+		sphinx-apidoc -o docs/ kafka_connect_watcher
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
 	$(BROWSER) docs/_build/html/index.html

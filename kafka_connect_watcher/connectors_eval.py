@@ -9,7 +9,9 @@ if TYPE_CHECKING:
     from multiprocessing import Queue
 
 from multiprocessing import Queue
+
 from kafka_connect_api.errors import GenericNotFound
+
 from kafka_connect_watcher.logger import LOG
 
 
