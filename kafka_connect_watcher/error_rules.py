@@ -160,6 +160,7 @@ class AutoCorrectRule:
         self.on_failure = set_else_none("on_failure", self.config)
         self.notify_targets = set_else_none("notify", self.config)
         self.notification_channels: list = []
+        self.map_notify_targets(watcher_config)
 
     def map_notify_targets(self, watcher_config: Config):
         """Maps the notification_channels to the rule notify targets"""
@@ -178,7 +179,7 @@ class AutoCorrectRule:
 
     def process(self, cluster: ConnectCluster, connector: Connector):
         interval_delta = max(
-            2, int(get_duration_timedelta(self.wait_for_status).total_seconds())
+            5, int(get_duration_timedelta(self.wait_for_status).total_seconds())
         )
         try:
             if self.action == "restart":

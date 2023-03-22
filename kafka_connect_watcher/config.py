@@ -116,7 +116,7 @@ class Config:
         return self._original_config
 
     def set_scan_intervals(self) -> int:
-        intervals_value = set_else_none("watch_interval", self.config, 15)
+        intervals_value = set_else_none("watch_interval", self.config, 60)
         if isinstance(intervals_value, str):
             interval_delta = get_duration(intervals_value)
             now = dt.now()

@@ -21,6 +21,7 @@ from jinja2 import (
     select_autoescape,
     exceptions as jinja_exceptions,
 )
+from kafka_connect_api.errors import GenericNotFound
 from importlib_resources import files as pkg_files
 from botocore.exceptions import ClientError
 from datetime import datetime as dt
@@ -97,7 +98,8 @@ class SnsChannel:
         cluster_id: str,
         connector_name: str,
         connector_error: str,
-    ):
+    ) -> str:
+        print("JINJA2, GO")
         jinja_env = Environment(
             loader=BaseLoader(),
             autoescape=True,
@@ -116,13 +118,22 @@ class SnsChannel:
         """Send error notification"""
         subject = f"Kafka Connect error for {connector.name}"
         messages: dict = {}
+        try:
+            connector_status = connector.status
+        except GenericNotFound:
+            connector_status = "Connector does not have any workable status"
         for sns_message_type in self.messages_templates:
-            messages[sns_message_type] = self.render_message_template(
-                self.messages_templates[sns_message_type],
-                cluster.name,
-                connector.name,
-                json.dumps(connector.status),
-            )
+            try:
+                content = self.render_message_template(
+                    self.messages_templates[sns_message_type],
+                    cluster.name,
+                    connector.name,
+                    json.dumps(connector_status),
+                )
+                messages[sns_message_type] = content
+            except Exception as error:
+                print("JINJA ERROR?", error)
+                raise
         self.publish(subject, messages)
 
     @property
