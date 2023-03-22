@@ -274,6 +274,10 @@
           "type": "string",
           "description": "Optional - Use IAM role to publish messages using another IAM role"
         },
+        "ignore_errors": {
+          "type": "boolean",
+          "description": "Prevents exception if true when an exception occurs."
+        },
         "template": {
           "type": "object",
           "description": "Allows to set specific templates for email and sms ",

@@ -17,9 +17,6 @@ from os import path, environ
 from jinja2 import (
     Environment,
     BaseLoader,
-    FileSystemLoader,
-    select_autoescape,
-    exceptions as jinja_exceptions,
 )
 from kafka_connect_api.errors import GenericNotFound
 from importlib_resources import files as pkg_files
@@ -29,6 +26,7 @@ from compose_x_common.compose_x_common import keyisset, set_else_none
 from compose_x_common.aws import get_assume_role_session
 from copy import deepcopy
 from boto3.session import Session
+from kafka_connect_watcher.logger import LOG
 
 
 class SnsChannel:
@@ -44,6 +42,7 @@ class SnsChannel:
             "email": pkg_files("kafka_connect_watcher").joinpath("aws_sns/email.j2"),
             "sms": pkg_files("kafka_connect_watcher").joinpath("aws_sns/sms.j2"),
         }
+        self.ignore_errors = keyisset("ignore_errors", self.definition)
         self._messages_templates: dict = {}
         self.import_jinja2_templates()
 
@@ -89,8 +88,8 @@ class SnsChannel:
                 )
 
         except (client.exceptions, ClientError) as error:
-            print(error)
-            print(f"Failed to send notification to {self.arn} with subject {subject}")
+            LOG.exception(error)
+            LOG.error(f"{self.name} - Failed to send notification to {self.arn}")
 
     @staticmethod
     def render_message_template(
@@ -99,7 +98,6 @@ class SnsChannel:
         connector_name: str,
         connector_error: str,
     ) -> str:
-        print("JINJA2, GO")
         jinja_env = Environment(
             loader=BaseLoader(),
             autoescape=True,
@@ -132,8 +130,12 @@ class SnsChannel:
                 )
                 messages[sns_message_type] = content
             except Exception as error:
-                print("JINJA ERROR?", error)
-                raise
+                LOG.exception(error)
+                LOG.error(
+                    f"Failed to render the Jinja2 template for {sns_message_type}"
+                )
+                if not self.ignore_errors:
+                    raise
         self.publish(subject, messages)
 
     @property
