@@ -102,6 +102,7 @@ Install
 
     requisites
     installation
+    configuration_file
     aws_emf_metrics
 
 .. toctree::
