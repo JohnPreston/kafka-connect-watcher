@@ -45,9 +45,6 @@ class SnsChannel:
         self._messages_templates: dict = {}
         self.import_jinja2_templates()
 
-        self._session = Session()
-        self._session_expiry = None
-
     def __repr__(self):
         return f"sns.{self.name}"
 
@@ -139,31 +136,15 @@ class SnsChannel:
 
     @property
     def session(self) -> Session:
-        """
-        Sets the boto3 session up
-        If role_arn is set, we assume_role to get the session, and keep track of expiry. If at execution the expiry
-        passed, re-assume to a new session and get new credentials.
-        Otherwise, use the default Session() set at __init__
-        """
         if keyisset("role_arn", self.definition):
-            if (
-                self._session
-                and self._session_expiry
-                and (dt.now()) < self._session_expiry
-            ):
-                return self._session
-            else:
-                self._session, details = get_assume_role_session(
-                    Session(),
-                    self.definition["role_arn"],
-                    set_else_none(
-                        "role_session_name",
-                        self.definition,
-                        f"KafkaConnectWatcher{self.name}",
-                    ),
-                    include_full_return=True,
-                    DurationSeconds=3600,
+            return get_assume_role_session(
+                Session(),
+                self.definition["role_arn"],
+                set_else_none(
+                    "role_session_name",
+                    self.definition,
+                    f"KafkaConnectWatcher{self.name}",
                 )
-                self._session_expiry = details["Credentials"]["Expiration"]
+            )
         else:
-            return self._session
+            return Session()

@@ -90,7 +90,10 @@ class Watcher:
                 )
                 if config.emf_watcher_config:
                     handle_watcher_emf(config, self)
-                sleep(config.scan_intervals)
+                for _second in range(1, config.scan_intervals):
+                    sleep(1)
+                    if not self.keep_running:
+                        break
                 self.metrics.update(
                     {"connect_clusters_healthy": 0, "connect_clusters_unhealthy": 0}
                 )

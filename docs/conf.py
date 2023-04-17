@@ -99,7 +99,7 @@ html_theme_options = {
     # 'google_analytics_account': 'UA-XXXXX',
     # Specify a base_url used to generate sitemap.xml. If not
     # specified, then no sitemap will be built.
-    "base_url": "https://docs.compose-x.io/",
+    "base_url": "https://kafka-connect-watcher.docs.compose-x.io/",
     "html_minify": False,
     "html_prettify": True,
     "css_minify": True,
