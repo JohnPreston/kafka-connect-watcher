@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "kafka-connect-watcher"
-version = "0.3.1"
+version = "0.3.2"
 description = "Kafka Connect active watcher"
 authors = ["John \"Preston\" Mille <john@ews-network.net>"]
 readme = "README.rst"
@@ -87,7 +87,7 @@ omit = [
 github_url = "https://github.com/johnpreston/kafka-connect-watcher"
 
 [tool.tbump.version]
-current = "0.3.1"
+current = "0.3.2"
 regex = '''
   (?P<major>\d+)
   \.
