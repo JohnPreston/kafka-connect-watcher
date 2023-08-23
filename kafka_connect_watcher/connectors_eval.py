@@ -46,7 +46,7 @@ def evaluate_connector_status(queue: Queue) -> None:
         }
         try:
             if connector.state in ["RUNNING"]:
-                if all([task.is_running for task in connector.tasks]):
+                if all([task.is_running() for task in connector.tasks]):
                     running_connectors += 1
                 else:
                     connectors_to_fix.append(connector)

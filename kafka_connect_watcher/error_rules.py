@@ -160,7 +160,8 @@ class AutoCorrectRule:
         self.on_failure = set_else_none("on_failure", self.config)
         self.notify_targets = set_else_none("notify", self.config)
         self.notification_channels: list = []
-        self.map_notify_targets(watcher_config)
+        if self.notify_targets:
+            self.map_notify_targets(watcher_config)
 
     def map_notify_targets(self, watcher_config: Config):
         """Maps the notification_channels to the rule notify targets"""
@@ -188,7 +189,8 @@ class AutoCorrectRule:
                 connector.pause()
             elif self.action == "cycle":
                 connector.cycle_connector()
-            elif self.action == "notify_only":
+        
+            if self.notify_targets:
                 for channel in self.notification_channels:
                     channel.send_error_notification(cluster, connector)
 
