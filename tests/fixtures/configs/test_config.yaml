@@ -1,0 +1,17 @@
+clusters:
+  - hostname: localhost
+    port: 8083
+    interval: 5s
+    evaluation_rules:
+      - auto_correct_actions:
+        - action: restart
+      - auto_correct_actions:
+        - action: pause
+          notify:
+           - target: sns.main_topic
+
+notification_channels:
+  sns:
+    main_topic:
+      topic_arn: arn:aws:sns:eu-west-1:123456789:test-sns-topic
+
