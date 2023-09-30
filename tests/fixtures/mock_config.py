@@ -32,3 +32,6 @@ class MockConnector:
         self.name = name
         self.state = state
         self.tasks = tasks
+
+    def cycle_connector(self):
+        pass
