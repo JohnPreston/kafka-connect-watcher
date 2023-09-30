@@ -1,14 +1,16 @@
 from queue import Queue
-import pytest
 from unittest import Mock
 
+import pytest
+
+from kafka_connect_watcher.connectors_eval import evaluate_connector_status
+
 from .fixtures.mock_config import (
-    MockEvaluationRule,
     MockConnectCluster,
     MockConnector,
+    MockEvaluationRule,
     MockTask,
 )
-from kafka_connect_watcher.connectors_eval import evaluate_connector_status
 
 
 @pytest.mark.parametrize(
@@ -18,7 +20,7 @@ from kafka_connect_watcher.connectors_eval import evaluate_connector_status
         "len_connectors_to_fix",
         "ignore_unassigned",
         "ignore_paused",
-        "cycle_connector"
+        "cycle_connector",
     ],
     (
         (["FAILED"], ["RUNNING"], 1, False, False, False),
@@ -41,10 +43,12 @@ def test_evaluate_connector_status(
     len_connectors_to_fix,
     ignore_unassigned,
     ignore_paused,
-    cycle_connector
+    cycle_connector,
 ):
     connector_queue = Queue()
-    rule = MockEvaluationRule(ignore_paused=ignore_paused, ignore_unassigned=ignore_unassigned)
+    rule = MockEvaluationRule(
+        ignore_paused=ignore_paused, ignore_unassigned=ignore_unassigned
+    )
     connect = MockConnectCluster()
     connectors = []
     connectors_to_fix = []

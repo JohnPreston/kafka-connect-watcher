@@ -1,6 +1,8 @@
 import pytest
+
 from kafka_connect_watcher.error_rules import EvaluationRule
 from tests.fixtures.mock_config import MockClusterConfig
+
 
 @pytest.mark.parametrize(
     ["rule_definition", "connector_name", "expected"],

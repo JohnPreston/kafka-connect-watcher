@@ -1,7 +1,8 @@
-import pytest
-import yaml
 import json
 from os import path
+
+import pytest
+import yaml
 
 from kafka_connect_watcher.config import Config
 

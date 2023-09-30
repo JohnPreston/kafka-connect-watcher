@@ -54,7 +54,7 @@ class SnsChannel:
         for message_type, template_path in self._templates_definitions.items():
             if not path.exists(template_path):
                 raise FileNotFoundError(f"Template file not found: {template_path}")
-            with open(path.abspath(template_path), "r") as template_file:
+            with open(path.abspath(template_path)) as template_file:
                 self._messages_templates[message_type] = template_file.read()
 
     @property
@@ -144,7 +144,7 @@ class SnsChannel:
                     "role_session_name",
                     self.definition,
                     f"KafkaConnectWatcher{self.name}",
-                )
+                ),
             )
         else:
             return Session()
