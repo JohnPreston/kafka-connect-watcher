@@ -68,8 +68,10 @@ def evaluate_connector_status(queue: Queue) -> None:
                         )
                     )
                 ):
+                    LOG.info(f'adding {connector.name} to running connectors')
                     running_connectors += 1
                 else:
+                    LOG.info(f'adding {connector.name} to fixing connectors')
                     connectors_to_fix.append(connector)
             elif connector.state == "PAUSED":
                 paused_connectors += 1
