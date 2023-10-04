@@ -45,7 +45,6 @@ def evaluate_connector_status(queue: Queue) -> None:
             ),
         }
         try:
-            LOG.info(f"Connector {connector.name}, {evaluation_rule.ignore_paused}")
             if connector.state in ["RUNNING"]:
                 if (
                     all([task.is_running() for task in connector.tasks])
@@ -68,10 +67,8 @@ def evaluate_connector_status(queue: Queue) -> None:
                         )
                     )
                 ):
-                    LOG.info(f'adding {connector.name} to running connectors')
                     running_connectors += 1
                 else:
-                    LOG.info(f'adding {connector.name} to fixing connectors')
                     connectors_to_fix.append(connector)
             elif connector.state == "PAUSED":
                 paused_connectors += 1
@@ -80,7 +77,6 @@ def evaluate_connector_status(queue: Queue) -> None:
             elif connector.state == "UNASSIGNED":
                 unassigned_connectors += 1
                 if not evaluation_rule.ignore_unassigned:
-                    LOG.info('CYCLING CONNECTOR')
                     connector.cycle_connector()
             else:
                 connectors_to_fix.append(connector)
