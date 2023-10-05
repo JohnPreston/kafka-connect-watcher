@@ -1,45 +1,57 @@
 from queue import Queue
+from unittest import Mock
+
 import pytest
-from fixtures.mock_config import (
-    MockEvaluationRule,
+
+from kafka_connect_watcher.connectors_eval import evaluate_connector_status
+
+from .fixtures.mock_config import (
     MockConnectCluster,
     MockConnector,
+    MockEvaluationRule,
     MockTask,
 )
-from kafka_connect_watcher.connectors_eval import evaluate_connector_status
 
 
 @pytest.mark.parametrize(
     [
         "connector_states",
         "task_states",
-        "expected_paused",
-        "expected_running",
-        "expected_unassigned",
         "len_connectors_to_fix",
+        "ignore_unassigned",
+        "ignore_paused",
+        "cycle_connector",
     ],
     (
-        (["FAILED"], ["RUNNING"], 0, 0, 0, 1),
-        (["RUNNING"], ["FAILED", "RUNNING"], 0, 0, 0, 1),
-        (["FAILED", "FAILED"], ["RUNNING"], 0, 0, 0, 2),
+        (["FAILED"], ["RUNNING"], 1, False, False, False),
+        (["RUNNING"], ["FAILED", "RUNNING"], 1, False, False, False),
+        (["RUNNING"], ["UNASSIGNED", "RUNNING"], 0, True, False, False),
+        (["RUNNING"], ["UNASSIGNED", "RUNNING"], 1, False, False, False),
+        (["RUNNING"], ["RUNNING", "PAUSED"], 0, False, True, False),
+        (["RUNNING"], ["PAUSED", "RUNNING"], 1, False, False, False),
+        (["PAUSED"], ["RUNNING"], 0, False, True, False),
+        (["PAUSED"], ["RUNNING"], 0, False, False, True),
+        (["UNASSIGNED"], ["RUNNING"], 0, True, False, False),
+        (["UNASSIGNED"], ["RUNNING"], 0, False, False, False),
+        (["FAILED", "FAILED"], ["RUNNING"], 2, False, False, False),
     ),
 )
 def test_evaluate_connector_status(
+    mocker,
     connector_states,
     task_states,
-    expected_paused,
-    expected_running,
-    expected_unassigned,
     len_connectors_to_fix,
+    ignore_unassigned,
+    ignore_paused,
+    cycle_connector,
 ):
     connector_queue = Queue()
-    rule = MockEvaluationRule()
+    rule = MockEvaluationRule(
+        ignore_paused=ignore_paused, ignore_unassigned=ignore_unassigned
+    )
     connect = MockConnectCluster()
     connectors = []
     connectors_to_fix = []
-    paused_connectors: int = 0
-    unassigned_connectors: int = 0
-    running_connectors: int = 0
     for connector_state in connector_states:
         tasks = []
         for task_state in task_states:
@@ -50,8 +62,8 @@ def test_evaluate_connector_status(
             [rule, connect, connector, 0, 0, 0, connectors_to_fix],
             False,
         )
+    mock_cycle = mocker.patch("fixtures.mock_config.MockConnector.cycle_connector")
     evaluate_connector_status(connector_queue)
-    assert paused_connectors == expected_paused
-    assert running_connectors == expected_running
-    assert unassigned_connectors == expected_unassigned
     assert len(connectors_to_fix) == len_connectors_to_fix
+    if cycle_connector:
+        mock_cycle.assert_called_once_with()

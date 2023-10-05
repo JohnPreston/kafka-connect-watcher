@@ -25,4 +25,3 @@ With python
     source watcher/bin/activate
     pip install pip -U; pip install kafka-connect-watcher
     kafka-connect-watcher -c config.yaml
-

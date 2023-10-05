@@ -42,7 +42,7 @@ class Config:
                 "You must specify either the configuration or the path to it."
             )
         if not configuration and config_file_path:
-            with open(path.abspath(config_file_path), "r") as config_fd:
+            with open(path.abspath(config_file_path)) as config_fd:
                 configuration = yaml.load(config_fd.read(), Loader=Loader)
         elif not config_file_path and not isinstance(configuration, (str, dict)):
             raise TypeError(
@@ -84,7 +84,7 @@ class Config:
                             f"{channel_name}.{sns_channel_name}"
                         ] = SnsChannel(sns_channel_name, sns_channel_definition)
                 else:
-                    LOG.warning("Channel {} is not supported.".format(channel_name))
+                    LOG.warning(f"Channel {channel_name} is not supported.")
 
     def __repr__(self):
         return json.dumps(self.original_config)

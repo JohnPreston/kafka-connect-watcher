@@ -97,7 +97,7 @@ class Watcher:
                 self.metrics.update(
                     {"connect_clusters_healthy": 0, "connect_clusters_unhealthy": 0}
                 )
-                LOG.debug("Watcher metrics: {}".format(self.metrics))
+                LOG.debug(f"Watcher metrics: {self.metrics}")
         except KeyboardInterrupt:
             self.keep_running = False
             LOG.debug("\rExited due to Keyboard interrupt")

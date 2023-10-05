@@ -46,13 +46,33 @@ def evaluate_connector_status(queue: Queue) -> None:
         }
         try:
             if connector.state in ["RUNNING"]:
-                if all([task.is_running() for task in connector.tasks]):
+                if (
+                    all([task.is_running() for task in connector.tasks])
+                    or (
+                        evaluation_rule.ignore_unassigned
+                        and all(
+                            [
+                                task.state in ["RUNNING", "UNASSIGNED"]
+                                for task in connector.tasks
+                            ]
+                        )
+                    )
+                    or (
+                        evaluation_rule.ignore_paused
+                        and all(
+                            [
+                                task.state in ["RUNNING", "PAUSED"]
+                                for task in connector.tasks
+                            ]
+                        )
+                    )
+                ):
                     running_connectors += 1
                 else:
                     connectors_to_fix.append(connector)
             elif connector.state == "PAUSED":
                 paused_connectors += 1
-                if evaluation_rule.ignore_paused:
+                if not evaluation_rule.ignore_paused:
                     connector.cycle_connector()
             elif connector.state == "UNASSIGNED":
                 unassigned_connectors += 1

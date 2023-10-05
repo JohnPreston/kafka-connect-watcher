@@ -14,4 +14,3 @@ notification_channels:
   sns:
     main_topic:
       topic_arn: arn:aws:sns:eu-west-1:123456789:test-sns-topic
-

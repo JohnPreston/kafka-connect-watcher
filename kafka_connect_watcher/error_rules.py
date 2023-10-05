@@ -189,7 +189,7 @@ class AutoCorrectRule:
                 connector.pause()
             elif self.action == "cycle":
                 connector.cycle_connector()
-        
+
             if self.notify_targets:
                 for channel in self.notification_channels:
                     channel.send_error_notification(cluster, connector)
