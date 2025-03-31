@@ -1,5 +1,5 @@
 from queue import Queue
-from unittest import Mock
+from unittest.mock import Mock
 
 import pytest
 
@@ -62,7 +62,9 @@ def test_evaluate_connector_status(
             [rule, connect, connector, 0, 0, 0, connectors_to_fix],
             False,
         )
-    mock_cycle = mocker.patch("fixtures.mock_config.MockConnector.cycle_connector")
+    mock_cycle = mocker.patch(
+        "tests.fixtures.mock_config.MockConnector.cycle_connector"
+    )
     evaluate_connector_status(connector_queue)
     assert len(connectors_to_fix) == len_connectors_to_fix
     if cycle_connector:
