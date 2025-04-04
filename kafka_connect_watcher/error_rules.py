@@ -185,8 +185,8 @@ class AutoCorrectRule:
         use_backoff = "max_backoff" in self.config and "max_attempts" in self.config
 
         if use_backoff:
-            max_backoff = self.config["max_backoff"]
-            max_attempts = self.config["max_attempts"]
+            max_backoff = max(1, self.config["max_backoff"])
+            max_attempts = max(1, self.config["max_attempts"])
             backoff = initial_delay
             attempt = 0
 
