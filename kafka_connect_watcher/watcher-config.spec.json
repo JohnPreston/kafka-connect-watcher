@@ -148,6 +148,16 @@
           "type": "string",
           "description": "duration to wait before checking on the connector status post action"
         },
+        "max_attempts": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Maximum number of backoff retry attempts before the corrective action is applied."
+        },
+        "max_backoff": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Maximum delay (in seconds) between backoff retries. Delay increases exponentially but is capped by this value."
+        },
         "notify": {
           "type": "array",
           "items": {

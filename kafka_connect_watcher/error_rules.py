@@ -179,9 +179,50 @@ class AutoCorrectRule:
         return self._original_config
 
     def process(self, cluster: ConnectCluster, connector: Connector):
-        interval_delta = max(
+        initial_delay = max(
             5, int(get_duration_timedelta(self.wait_for_status).total_seconds())
         )
+        use_backoff = "max_backoff" in self.config and "max_attempts" in self.config
+
+        if use_backoff:
+            max_backoff = max(1, self.config["max_backoff"])
+            max_attempts = max(1, self.config["max_attempts"])
+            backoff = initial_delay
+            attempt = 0
+
+            LOG.info(
+                f"Backoff enabled: max_backoff={max_backoff}, max_attempts={max_attempts}"
+            )
+
+            while attempt < max_attempts:
+                status = connector.status
+                connector_state = status.get("connector", {}).get("state", "UNKNOWN")
+                task_states = [
+                    task.get("state", "UNKNOWN") for task in status.get("tasks", [])
+                ]
+
+                all_tasks_running = all(state == "RUNNING" for state in task_states)
+
+                if connector_state == "RUNNING" and all_tasks_running:
+                    LOG.info(
+                        f"{connector.name} and all its tasks have recovered. Skipping corrective action."
+                    )
+                    return
+
+                LOG.warning(
+                    f"{connector.name} not fully recovered (connector: {connector_state}, tasks: {task_states}). "
+                    f"Attempt {attempt + 1}/{max_attempts}. Waiting {backoff}s before re-checking..."
+                )
+                time.sleep(backoff)
+                backoff = min(max_backoff, backoff * 2)
+                attempt += 1
+        else:
+            LOG.info(
+                f"No backoff configured for connector {connector.name}. "
+                f"Applying corrective action '{self.action}' immediately."
+            )
+
+        # Apply the corrective action after backoff loop or immediately if no backoff
         try:
             if self.action == "restart":
                 connector.restart()
@@ -190,24 +231,30 @@ class AutoCorrectRule:
             elif self.action == "cycle":
                 connector.cycle_connector()
 
+            LOG.info(
+                f"Applied corrective action '{self.action}' to connector {connector.name}"
+            )
+
             if self.notify_targets:
                 for channel in self.notification_channels:
                     channel.send_error_notification(cluster, connector)
 
-            time.sleep(interval_delta)
-            print("Post action status", connector.name, connector.status)
+            time.sleep(initial_delay)
+            LOG.info(f"Post-action status for {connector.name}: {connector.status}")
+
         except Exception as error:
-            print(error)
+            LOG.exception(
+                f"Error applying corrective action to connector {connector.name}: {error}"
+            )
+
             if self.on_failure:
                 log_level_to_set = set_else_none("loglevel", self.on_failure)
                 connector_class = set_else_none(
                     "connector.class",
                     connector.config,
-                    set_else_none(
-                        "class",
-                        connector.config,
-                    ),
+                    set_else_none("class", connector.config),
                 )
+
                 if (
                     connector.state not in ["RUNNING", "PAUSED"]
                     and log_level_to_set
