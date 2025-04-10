@@ -1,7 +1,6 @@
 ---
 # Docker compose example file to test EMF & Prometheus
 
-version: "3.8"
 services:
   kafka-connect-watcher:
     build:

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "kafka-connect-watcher"
-version = "0.5.1"
+version = "0.6.0"
 description = "Kafka Connect active watcher"
 authors = ["John \"Preston\" Mille <john@ews-network.net>"]
 readme = "README.rst"
@@ -14,9 +14,10 @@ classifiers = [
   "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)",
   "Natural Language :: English",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.8",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
 ]
 packages = [{ include = "kafka_connect_watcher" }]
 include = [
@@ -34,7 +35,7 @@ kafka_connect_watcher = "kafka_connect_watcher.cli:start_watcher"
 kafka-connect-watcher = "kafka_connect_watcher.cli:start_watcher"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.10"
 compose-x-common = "^1.4"
 kafka-connect-api = "^0.5.3"
 pyyaml = "^6.0"
@@ -42,7 +43,7 @@ jsonschema = "^4.17.3"
 importlib-resources = "^6.1"
 prometheus-client = "^0.16"
 aws-embedded-metrics = "^3.0.0"
-jinja2 = "^3.1.2"
+jinja2 = "^3.1.6"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.1"
@@ -87,7 +88,7 @@ omit = [
 github_url = "https://github.com/johnpreston/kafka-connect-watcher"
 
 [tool.tbump.version]
-current = "0.5.1"
+current = "0.6.0"
 regex = '''
   (?P<major>\d+)
   \.
