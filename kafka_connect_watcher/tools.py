@@ -1,4 +1,4 @@
-#   SPDX-License-Identifier: MPL-2.0
+#   SPDX-License-Identifier: Apache-2.0
 #   Copyright 2023 John "Preston" Mille <john@ews-network.net>
 
 from __future__ import annotations
